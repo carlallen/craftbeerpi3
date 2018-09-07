@@ -18,6 +18,7 @@ from hardware import *
 
 import time
 import uuid
+from os import popen, system
 
 
 class NotificationAPI(object):
@@ -151,6 +152,9 @@ class SensorAPI(object):
         filename = "./logs/%s_%s.log" % (prefix, str(id))
         formatted_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
         msg = str(formatted_time) + "," +str(value) + "," + str(int(time.time() * 1000)) + "\n"
+        if popen("tail -n 2 "+ filename).read().count(","+ str(value)+ "\n") == 2:
+            # if the data was logged twice, delete the last logged data and write a new one
+            system("truncate -s -\"$(tail -n1 " + filename + " | wc -c)\" " + filename)
 
         with open(filename, "a") as file:
             file.write(msg)
