@@ -15,6 +15,7 @@ from functools import wraps, update_wrapper
 from props import *
 
 from hardware import *
+import re
 
 import time
 import uuid
@@ -152,7 +153,7 @@ class SensorAPI(object):
         filename = "./logs/%s_%s.log" % (prefix, str(id))
         formatted_time = strftime("%Y-%m-%d %H:%M:%S", localtime())
         msg = str(formatted_time) + "," +str(value) + "," + str(int(time.time() * 1000)) + "\n"
-        if popen("tail -n 2 "+ filename).read().count(","+ str(value)+ "\n") == 2:
+        if len(re.findall(',' + str(value) + '\d+\n', popen("tail -n 2 "+ filename).read())) == 2:
             # if the data was logged twice, delete the last logged data and write a new one
             system("truncate -s -\"$(tail -n1 " + filename + " | wc -c)\" " + filename)
 
